@@ -1,0 +1,20 @@
+{
+	"uri": "http://localhost/link-driven/test/configuration.json",
+	"links": [
+		{
+			"rel": "service",
+			"href": "http://localhost/link-driven/test/data.php",
+			"alias": "data"
+		},
+		{
+			"rel": "template",
+			"href": "http://localhost/link-driven/test/template.html",
+			"alias": "resultTemplate"
+		},
+		{
+			"rel": "module",
+			"href": "http://localhost/link-driven/test/configuration-sub.json",
+			"alias": "sub-config"
+		}
+	]
+}
