@@ -1,3 +1,6 @@
+<?php
+	require_once 'BASE.php';
+?>
 <!DOCTYPE html>
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -53,14 +56,14 @@
 		.factory('testConfigLoader', [
 			'ldrvn',
 			function(ldrvn){
-				return ldrvn.util.loadConfig('http://localhost/link-driven/test/configuration.json');
+				return ldrvn.util.loadConfig('<?= BASEPATH ?>configuration.php');
 			}
 		])
 
 		.factory('subTestConfigLoader', [
 			'ldrvn',
 			function(ldrvn){
-				return ldrvn.util.loadConfig('http://localhost/link-driven/test/configuration-sub.json');
+				return ldrvn.util.loadConfig('<?= BASEPATH ?>configuration-sub.php');
 			}
 		])
 
