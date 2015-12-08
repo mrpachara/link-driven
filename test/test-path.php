@@ -3,5 +3,6 @@
 
 	header("Content-Type: text/plain; charset=utf-8");
 
-	echo BASEPATH."xxx/yyy/zzzz";
+	echo BASEPATH."xxx/yyy/zzzz".PHP_EOL;
+	var_dump($_SERVER);
 ?>
