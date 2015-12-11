@@ -18,8 +18,16 @@
 						return true;
 					},
 					'$get': [
-						'$cacheFactory', '$http', '$interpolate', '$q', '$log', '$injector',
-						function($cacheFactory, $http, $interpolate, $q, $log, $injector){
+						'$window', '$cacheFactory', '$http', '$interpolate', '$q', '$log', '$injector',
+						function($window, $cacheFactory, $http, $interpolate, $q, $log, $injector){
+							var urlSolver = (function(){
+								var aTag = angular.element('<a></a>');
+
+								return function(url){
+									aTag.attr('href', url);
+									return aTag.prop('href');
+								};
+							})();
 							function LinkDriven(links){
 								Object.defineProperty(this, '$$links', {
 									'value': links,
@@ -33,8 +41,9 @@
 								'init': function(link){
 									if(angular.isDefined(link.$pattern)) return link;
 
+									if(angular.isDefined(link.href)) link.href = $window.decodeURI(urlSolver(link.href));
+									if(angular.isDefined(link.pattern)) link.pattern = $window.decodeURI(urlSolver(link.pattern));
 									link.$pattern = $interpolate((angular.isDefined(link.pattern))? link.pattern : link.href);
-
 									return link;
 								},
 							});
@@ -70,7 +79,6 @@
 								},
 								'url': function(uri){
 									uri = this.prepareURI(uri);
-
 									return (uri[0] === null)? null : uri[0].$pattern(uri[1]);
 								},
 								'http': function(uri, config){
