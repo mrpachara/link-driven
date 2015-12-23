@@ -11,11 +11,10 @@
 				};
 
 				var provider = {
-					'attachEngine': function(name, engine){
-						if(angular.isDefined(local.engines[name])) return false;
+					'appendEngine': function(engines){
+						angular.extend(local.engines, engines);
 
-						local.engines[name] = engine;
-						return true;
+						return provider;
 					},
 					'$get': [
 						'$window', '$cacheFactory', '$http', '$interpolate', '$q', '$log', '$injector',
@@ -71,6 +70,8 @@
 										uri = [uri, {}];
 									} else if(uri.$pattern){
 										uri = [uri, {}];
+									} else{
+										uri = uri.slice(0);
 									}
 
 									if(angular.isUndefined(uri[0].$pattern)) uri[0] = this.link(uri[0]);
@@ -148,8 +149,8 @@
 									});
 								},
 								'createService': function(config, description){
-									var preparedDescription = angular.extend({}, description);
-									var service = Object.create(preparedDescription);
+									var preparedDescription = Object.create(local.services);
+									var service = Object.create(angular.extend(preparedDescription, description));
 
 									Object.defineProperty(service, 'promise', {
 										'value': util.loadConfig(config).then(function(configService){
@@ -166,13 +167,10 @@
 							};
 
 							var factory = {
-								'attachService': function(service){
-									for(var i = 0; i < local.services.length; i++){
-										if(service === local.services[i]) return false;
-									}
-									local.services.push(service);
+								'extendService': function(services){
+									angular.extend(local.services, services);
 
-									return true;
+									return factory;
 								},
 								'util': util,
 							};

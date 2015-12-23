@@ -19,37 +19,38 @@
 		.config([
 			'ldrvnProvider',
 			function(ldrvnProvider){
-				ldrvnProvider.attachEngine('template', [
-					function(){
-						return function(uri, data){
-							var result = null;
+				ldrvnProvider.appendEngine({
+					'template': [
+						function(){
+							return function(uri, data){
+								var result = null;
 
-							uri = this.prepareURI(uri);
-							if((uri[0] !== null) && (uri[0].rel === 'template')){
-								result = this.url(uri);
-							}
+								uri = this.prepareURI(uri);
+								if((uri[0] !== null) && (uri[0].rel === 'template')){
+									result = this.url(uri);
+								}
 
-							return result;
-						};
-					}
-				]);
+								return result;
+							};
+						}
+					],
+					'reference': [
+						'$q',
+						function($q){
+							var ldrvn = this;
+							return function(uri, serviceHref, config){
+								uri = this.prepareURI(uri);
+								if((uri[0] !== null) && (uri[0].rel === 'module')){
+									return ldrvn.util.loadConfig(this.url(uri)).then(function(configService){
+										return configService.http(serviceHref, config);
+									});
+								}
 
-				ldrvnProvider.attachEngine('reference', [
-					'$q',
-					function($q){
-						var ldrvn = this;
-						return function(uri, serviceHref, config){
-							uri = this.prepareURI(uri);
-							if((uri[0] !== null) && (uri[0].rel === 'module')){
-								return ldrvn.util.loadConfig(this.url(uri)).then(function(configService){
-									return configService.http(serviceHref, config);
-								});
-							}
-
-							return $q.reject(new Error('Service is not ready'));
-						};
-					}
-				]);
+								return $q.reject(new Error('Service is not ready'));
+							};
+						}
+					],
+				});
 			}
 		])
 
