@@ -15,8 +15,6 @@
 		<script type="application/javascript" src="../angular-core.js"></script>
 		<script type="application/javascript" src="app-sub.js"></script>
 		<script type="application/javascript" src="app.js"></script>
-		<script type="application/javascript">
-		</script>
 	</head>
 	<body ng-app="app">
 		<div ng-controller="TestCase01 as testCase01">

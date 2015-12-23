@@ -4,7 +4,7 @@
 	header("Content-Type: application/json; charset=utf-8");
 ?>
 {
-	"uri": "<?= BASEPATH ?>configuration.ogo",
+	"uri": "<?= BASEPATH ?>configuration.php",
 	"links": [
 		{
 			"rel": "service",

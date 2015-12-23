@@ -10,7 +10,7 @@
 		};
 	})();
 
-	function CoreLinkDriven(links){
+	function LinkDrivenPrototype(links){
 		Object.defineProperty(this, '$$links', {
 			'value': links,
 		});
@@ -18,29 +18,24 @@
 			LinkDriven.init(link);
 		});
 	}
-
-	function Engines(){
-		CoreLinkDriven.apply(this, arguments);
-	};
 	function LinkDriven(){
-		Engines.apply(this, arguments);
-	};
-	function CoreServices(){};
-	function Services(){
-		CoreServices.apply(this, arguments);
+		LinkDrivenPrototype.apply(this, arguments);
 	};
 
-	Engines.prototype = Object.create(CoreLinkDriven.prototype);
-	Engines.prototype.constructor = Engines;
-	LinkDriven.prototype = Object.create(Engines.prototype);
+	function ServicesPrototype(){};
+	function Services(){
+		ServicesPrototype.apply(this, arguments);
+	};
+
+	LinkDriven.prototype = Object.create(LinkDrivenPrototype.prototype);
 	LinkDriven.prototype.constructor = LinkDriven;
-	Services.prototype = Object.create(CoreServices.prototype);
+	Services.prototype = Object.create(ServicesPrototype.prototype);
 	Services.prototype.constructor = Services;
 
 	angular.module('ldrvn', [])
 		.provider('ldrvn', [
 			function(){
-				var providerLocal = {
+				var localProvider = {
 					'engines': {},
 					'services': {},
 				};
@@ -51,12 +46,12 @@
 
 				var provider = {
 					'appendEngine': function(engines){
-						angular.extend(providerLocal.engines, engines);
+						angular.extend(localProvider.engines, engines);
 
 						return provider;
 					},
 					'appendService': function(services){
-						angular.extend(providerLocal.services, services);
+						angular.extend(localProvider.services, services);
 
 						return provider;
 					},
@@ -155,7 +150,7 @@
 								},
 							});
 
-							var util = {
+							var factory = {
 								'ldrvn': function(links){
 									return new LinkDriven(links);
 								},
@@ -182,7 +177,7 @@
 									var service = Object.create(angular.extend(new Services(), description));
 
 									Object.defineProperty(service, 'promise', {
-										'value': util.loadConfig(config).then(function(configService){
+										'value': factory.loadConfig(config).then(function(configService){
 											Object.defineProperty(service, '$$configService', {
 												'value': configService,
 											});
@@ -195,25 +190,11 @@
 								},
 							};
 
-							var factory = {
-								'extendEngine': function(services){
-									angular.extend(LinkDriven.prototype, services);
-
-									return factory;
-								},
-								'extendService': function(services){
-									angular.extend(Services.prototype, services);
-
-									return factory;
-								},
-								'util': util,
-							};
-
-							angular.forEach(providerLocal.engines, function(engine, name){
-								Engines.prototype[name] = $injector.invoke(engine, factory);
+							angular.forEach(localProvider.engines, function(engine, name){
+								LinkDriven.prototype[name] = $injector.invoke(engine, factory);
 							});
 
-							angular.forEach(providerLocal.services, function(service, name){
+							angular.forEach(localProvider.services, function(service, name){
 								Services.prototype[name] = $injector.invoke(service, factory);
 							});
 

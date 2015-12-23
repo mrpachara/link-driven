@@ -26,7 +26,7 @@ console.info('app config');
 							return function(uri, serviceHref, config){
 								uri = this.$prepareURI(uri);
 								if((uri[0] !== null) && (uri[0].rel === 'module')){
-									return ldrvn.util.loadConfig(this.$url(uri)).then(function(configService){
+									return ldrvn.loadConfig(this.$url(uri)).then(function(configService){
 										return configService.$http(serviceHref, config);
 									});
 								}
@@ -42,21 +42,21 @@ console.info('app config');
 		.factory('testConfigLoader', [
 			'ldrvn',
 			function(ldrvn){
-				return ldrvn.util.loadConfig('./configuration.php');
+				return ldrvn.loadConfig('./configuration.php');
 			}
 		])
 
 		.factory('subTestConfigLoader', [
 			'ldrvn',
 			function(ldrvn){
-				return ldrvn.util.loadConfig('./configuration-sub.php');
+				return ldrvn.loadConfig('./configuration-sub.php');
 			}
 		])
 
 		.factory('testService', [
 			'$q', 'ldrvn', 'testConfigLoader', 'subTestConfigLoader',
 			function($q, ldrvn, testConfigLoader, subTestConfigLoader){
-				return ldrvn.util.createService(testConfigLoader, {
+				return ldrvn.createService(testConfigLoader, {
 					'load': function(){
 						var service = this;
 console.debug('test01', service, service.$$configService);
@@ -87,7 +87,7 @@ console.info('app run');
 		.factory('test02Service', [
 			'$q', 'ldrvn', 'testConfigLoader', 'subTestConfigLoader',
 			function($q, ldrvn, testConfigLoader, subTestConfigLoader){
-				return ldrvn.util.createService(testConfigLoader, {
+				return ldrvn.createService(testConfigLoader, {
 					'loadx': function(){
 						var service = this;
 						if(angular.isUndefined(service.$$configService)) return $q.reject(new Error('Service not ready'));
