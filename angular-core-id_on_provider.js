@@ -1,68 +1,41 @@
 (function(angular){
 	'use strict';
 
-	var urlSolver = (function(){
-		var aTag = angular.element('<a></a>');
-
-		return function UrlSolver(url){
-			aTag.attr('href', url);
-			return aTag.prop('href');
-		};
-	})();
-
-	function CoreLinkDriven(links){
-		Object.defineProperty(this, '$$links', {
-			'value': links,
-		});
-		angular.forEach(links, function(link){
-			LinkDriven.init(link);
-		});
-	}
-
-	function Engines(){
-		CoreLinkDriven.apply(this, arguments);
-	};
-	function LinkDriven(){
-		Engines.apply(this, arguments);
-	};
-	function CoreServices(){};
-	function Services(){
-		CoreServices.apply(this, arguments);
-	};
-
-	Engines.prototype = Object.create(CoreLinkDriven.prototype);
-	Engines.prototype.constructor = Engines;
-	LinkDriven.prototype = Object.create(Engines.prototype);
-	LinkDriven.prototype.constructor = LinkDriven;
-	Services.prototype = Object.create(CoreServices.prototype);
-	Services.prototype.constructor = Services;
-
 	angular.module('ldrvn', [])
 		.provider('ldrvn', [
 			function(){
-				var providerLocal = {
-					'engines': {},
-					'services': {},
-				};
-
 				var local = {
+					'engines': {},
+					'services': [],
 					'configLoaders': {},
 				};
 
 				var provider = {
 					'appendEngine': function(engines){
-						angular.extend(providerLocal.engines, engines);
-
-						return provider;
-					},
-					'appendService': function(services){
-						angular.extend(providerLocal.services, services);
+						angular.extend(local.engines, engines);
 
 						return provider;
 					},
 					'$get': [
 						'$window', '$cacheFactory', '$http', '$interpolate', '$q', '$log', '$injector',
 						function($window, $cacheFactory, $http, $interpolate, $q, $log, $injector){
+							var urlSolver = (function(){
+								var aTag = angular.element('<a></a>');
+
+								return function(url){
+									aTag.attr('href', url);
+									return aTag.prop('href');
+								};
+							})();
+							function LinkDriven(links){
+								Object.defineProperty(this, '$$links', {
+									'value': links,
+								});
+								angular.forEach(links, function(link){
+									LinkDriven.init(link);
+								});
+							}
+
 							angular.extend(LinkDriven, {
 								'init': function(link){
 									if(angular.isDefined(link.$pattern)) return link;
@@ -75,7 +48,7 @@
 							});
 
 							angular.extend(LinkDriven.prototype, {
-								'$link': function(href){
+								'link': function(href){
 									for(var i = 0; i < this.$$links.length; i++){
 										var link = this.$$links[i];
 										if((link.href === href) || (link.alias === href)) return LinkDriven.init(link);
@@ -83,7 +56,7 @@
 
 									return null;
 								},
-								'$links': function(rel){
+								'forLinks': function(rel){
 									var links = [];
 									for(var i = 0; i < this.$$links.length; i++){
 										var link = this.$$links[i];
@@ -92,10 +65,7 @@
 
 									return links;
 								},
-								'$forLinks': function(rel, fn){
-									angular.forEach(this.$links(rel), fn);
-								},
-								'$prepareURI': function(uri){
+								'prepareURI': function(uri){
 									if(angular.isString(uri)){
 										uri = [uri, {}];
 									} else if(uri.$pattern){
@@ -104,34 +74,34 @@
 										uri = uri.slice(0);
 									}
 
-									if(angular.isUndefined(uri[0].$pattern)) uri[0] = this.$link(uri[0]);
+									if(angular.isUndefined(uri[0].$pattern)) uri[0] = this.link(uri[0]);
 
 									return uri;
 								},
-								'$url': function(uri){
-									uri = this.$prepareURI(uri);
+								'url': function(uri){
+									uri = this.prepareURI(uri);
 									return (uri[0] === null)? null : uri[0].$pattern(uri[1]);
 								},
-								'$http': function(uri, config){
-									var uri = this.$prepareURI(uri);
+								'http': function(uri, config){
+									var uri = this.prepareURI(uri);
 
-									var extend = {'url': this.$url(uri)};
+									var extend = {'url': this.url(uri)};
 									if(angular.isDefined(uri[0].method)) extend['method'] = uri[0].method;
 
 									return $http(angular.extend({}, config, extend)).then(function(response){
 										return response.data;
 									});
 								},
-								'$load': function(uri, config){
+								'load': function(uri, config){
 									if(arguments.length < 2) config = {};
 
-									return this.$http(uri, config);
+									return this.http(uri, config);
 								},
-								'$send': function(uri, data, config){
+								'send': function(uri, data, config){
 									if(arguments.length < 3) config = {};
 
 									config = angular.extend({}, {'data': data, 'method': 'post'});
-									return this.$http(uri, config);
+									return this.http(uri, config);
 								},
 							});
 
@@ -150,7 +120,7 @@
 							Config.prototype = Object.create(LinkDriven.prototype);
 							Config.prototype.constructor = Config;
 							angular.extend(Config.prototype, {
-								'$prop': function(name){
+								'prop': function(name){
 									return this.$$config[name];
 								},
 							});
@@ -179,7 +149,8 @@
 									});
 								},
 								'createService': function(config, description){
-									var service = Object.create(angular.extend(new Services(), description));
+									var preparedDescription = Object.create(local.services);
+									var service = Object.create(angular.extend(preparedDescription, description));
 
 									Object.defineProperty(service, 'promise', {
 										'value': util.loadConfig(config).then(function(configService){
@@ -196,25 +167,16 @@
 							};
 
 							var factory = {
-								'extendEngine': function(services){
-									angular.extend(LinkDriven.prototype, services);
-
-									return factory;
-								},
 								'extendService': function(services){
-									angular.extend(Services.prototype, services);
+									angular.extend(local.services, services);
 
 									return factory;
 								},
 								'util': util,
 							};
 
-							angular.forEach(providerLocal.engines, function(engine, name){
-								Engines.prototype[name] = $injector.invoke(engine, factory);
-							});
-
-							angular.forEach(providerLocal.services, function(service, name){
-								Services.prototype[name] = $injector.invoke(service, factory);
+							angular.forEach(local.engines, function(engine, name){
+								LinkDriven.prototype[name] = $injector.invoke(engine, factory);
 							});
 
 							return factory;
