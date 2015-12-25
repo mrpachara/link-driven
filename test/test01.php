@@ -2,7 +2,7 @@
 	require_once 'BASE.php';
 ?>
 <!DOCTYPE html>
-<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" ng-app="app" ng-strict-di>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 		<meta charset="UTF-8" />
@@ -13,14 +13,9 @@
 		<script type="application/javascript" src="../../camt/js/lib/bower_components/angular/angular.js"></script>
 
 		<script type="application/javascript" src="../angular-core.js"></script>
+		<script type="application/javascript" src="../angular-service.js"></script>
 		<script type="application/javascript" src="app-sub.js"></script>
 		<script type="application/javascript" src="app.js"></script>
 	</head>
-	<body ng-app="app">
-		<div ng-controller="TestCase01 as testCase01">
-			<button type="button" ng-click="testCase01.send()">Send</button>
-			<pre>{{ testCase01|json:true }}</pre>
-			<div ng-include="testCase01.service02.templatex('resultTemplate')"></div>
-		</div>
-	</body>
+	<body ng-include="layoutService.url()"></body>
 </html>

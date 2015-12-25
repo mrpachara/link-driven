@@ -17,6 +17,11 @@
 			"alias": "resultTemplate"
 		},
 		{
+			"rel": "layout",
+			"href": "<?= BASEPATH ?>main-layout.html",
+			"alias": "main-layout"
+		},
+		{
 			"rel": "module",
 			"href": "<?= BASEPATH ?>configuration-sub.php",
 			"alias": "sub-config"

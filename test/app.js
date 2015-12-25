@@ -1,8 +1,10 @@
 (function(angular){
-	angular.module('app', ['ldrvn', 'app.sub'])
+	'use strict';
+
+	angular.module('app', ['ldrvn.service', 'app.sub'])
 		.config([
-			'ldrvnProvider',
-			function(ldrvnProvider){
+			'ldrvnProvider', 'layoutServiceProvider',
+			function(ldrvnProvider, layoutServiceProvider){
 console.info('app config');
 				ldrvnProvider.appendEngine({
 					'template': [
@@ -35,6 +37,19 @@ console.info('app config');
 							};
 						}
 					],
+				});
+
+				layoutServiceProvider.configURI('./configuration.php');
+			}
+		])
+
+		.run([
+			'$rootScope', 'layoutService',
+			function($rootScope, layoutService){
+				$rootScope.layoutService = layoutService;
+
+				layoutService.promise.then(function(service){
+					service.url('main-layout');
 				});
 			}
 		])
@@ -88,18 +103,6 @@ console.info('app run');
 			'$q', 'ldrvn', 'testConfigLoader', 'subTestConfigLoader',
 			function($q, ldrvn, testConfigLoader, subTestConfigLoader){
 				return ldrvn.createService(testConfigLoader, {
-					'loadx': function(){
-						var service = this;
-						if(angular.isUndefined(service.$$configService)) return $q.reject(new Error('Service not ready'));
-
-						return service.$$configService.$load('data');
-					},
-					'sendx': function(item){
-						var service = this;
-						if(angular.isUndefined(service.$$configService)) return $q.reject(new Error('Service not ready'));
-
-						return service.$$configService.reference('sub-config', ['update', item], {'data': item});
-					},
 					'templatex': function(href){
 						var service = this;
 console.debug('test02', service, service.$$configService);
