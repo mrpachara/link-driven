@@ -3,10 +3,10 @@
 
 	angular.module('app', ['ldrvn.service', 'app.sub'])
 		.config([
-			'ldrvnProvider', 'layoutServiceProvider',
-			function(ldrvnProvider, layoutServiceProvider){
+			'$ldrvnProvider', 'layoutServiceProvider',
+			function($ldrvnProvider, layoutServiceProvider){
 console.info('app config');
-				ldrvnProvider.appendEngine({
+				$ldrvnProvider.appendEngine({
 					'template': [
 						function(){
 							return function(uri, data){
@@ -21,22 +21,6 @@ console.info('app config');
 							};
 						}
 					],
-					'reference': [
-						'$q',
-						function($q){
-							var ldrvn = this;
-							return function(uri, serviceHref, config){
-								uri = this.$prepareURI(uri);
-								if((uri[0] !== null) && (uri[0].rel === 'module')){
-									return ldrvn.loadConfig(this.$url(uri)).then(function(configService){
-										return configService.$http(serviceHref, config);
-									});
-								}
-
-								return $q.reject(new Error('Service is not ready'));
-							};
-						}
-					],
 				});
 
 				layoutServiceProvider.configURI('./configuration.php');
@@ -44,34 +28,42 @@ console.info('app config');
 		])
 
 		.run([
-			'$rootScope', 'layoutService',
-			function($rootScope, layoutService){
+			'$rootScope', '$ldrvn', 'layoutService',
+			function($rootScope, $ldrvn, layoutService){
 				$rootScope.layoutService = layoutService;
 
 				layoutService.promise.then(function(service){
 					service.url('main-layout');
 				});
+
+				$ldrvn.loadConfig('./configuration').then(function(configService){
+					configService.module().dependencies().then(function(modules){
+						console.debug('dependencies:', modules);
+					});
+				}, function(error){
+console.error(error);
+				});
 			}
 		])
 
 		.factory('testConfigLoader', [
-			'ldrvn',
-			function(ldrvn){
-				return ldrvn.loadConfig('./configuration.php');
+			'$ldrvn',
+			function($ldrvn){
+				return $ldrvn.loadConfig('./configuration.php');
 			}
 		])
 
 		.factory('subTestConfigLoader', [
-			'ldrvn',
-			function(ldrvn){
-				return ldrvn.loadConfig('./configuration-sub.php');
+			'$ldrvn',
+			function($ldrvn){
+				return $ldrvn.loadConfig('./configuration-sub.php');
 			}
 		])
 
 		.factory('testService', [
-			'$q', 'ldrvn', 'testConfigLoader', 'subTestConfigLoader',
-			function($q, ldrvn, testConfigLoader, subTestConfigLoader){
-				return ldrvn.createService(testConfigLoader, {
+			'$q', '$ldrvn', 'testConfigLoader', 'subTestConfigLoader',
+			function($q, $ldrvn, testConfigLoader, subTestConfigLoader){
+				return $ldrvn.createService(testConfigLoader, {
 					'load': function(){
 						var service = this;
 console.debug('test01', service, service.$$configService);
@@ -83,7 +75,9 @@ console.debug('test01', service, service.$$configService);
 						var service = this;
 						if(angular.isUndefined(service.$$configService)) return $q.reject(new Error('Service not ready'));
 
-						return service.$$configService.reference('sub-config', ['update', item], {'data': item});
+						return service.$$configService.module().ref('sub-config').then(function(configService){
+							return configService.$http(['update', item], {'data': item});
+						});
 					},
 					'template': function(href){
 						var service = this;
@@ -100,9 +94,9 @@ console.info('app run');
 		}])
 
 		.factory('test02Service', [
-			'$q', 'ldrvn', 'testConfigLoader', 'subTestConfigLoader',
-			function($q, ldrvn, testConfigLoader, subTestConfigLoader){
-				return ldrvn.createService(testConfigLoader, {
+			'$q', '$ldrvn', 'testConfigLoader', 'subTestConfigLoader',
+			function($q, $ldrvn, testConfigLoader, subTestConfigLoader){
+				return $ldrvn.createService(testConfigLoader, {
 					'templatex': function(href){
 						var service = this;
 console.debug('test02', service, service.$$configService);
@@ -131,7 +125,7 @@ console.debug('test02', service, service.$$configService);
 					vm.model = data;
 				});
 			});
-		}, 3000);
+		}, 1000);
 	}
 
 	TestCase01Controller.$inject = ['$timeout', 'testService', 'test02Service'];

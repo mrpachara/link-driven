@@ -6,7 +6,7 @@
 
 		return function UrlSolver(url){
 			aTag.attr('href', url);
-			return aTag.prop('href');
+			return decodeURI(aTag.prop('href'));
 		};
 	})();
 
@@ -33,7 +33,7 @@
 	Services.prototype.constructor = Services;
 
 	angular.module('ldrvn', [])
-		.provider('ldrvn', [
+		.provider('$ldrvn', [
 			function(){
 				var localProvider = {
 					'engines': {},
@@ -58,8 +58,8 @@
 								'init': function(link){
 									if(angular.isDefined(link.$$interpolate)) return link;
 
-									if(angular.isDefined(link.href)) link.href = decodeURI(urlSolver(link.href));
-									if(angular.isDefined(link.pattern)) link.pattern = decodeURI(urlSolver(link.pattern));
+									if(angular.isDefined(link.href)) link.href = urlSolver(link.href);
+									if(angular.isDefined(link.pattern)) link.pattern = urlSolver(link.pattern);
 									Object.defineProperty(link, '$$interpolate', {
 										'value': $interpolate((angular.isDefined(link.pattern))? link.pattern : link.href),
 									});
@@ -87,7 +87,13 @@
 									return links;
 								},
 								'$forLinks': function(rel, fn){
-									angular.forEach(this.$links(rel), fn);
+									if(arguments.length === 1){
+										fn = rel;
+										rel = undefined;
+									}
+
+									var links = (rel)? this.$links(rel) : this.$$links;
+									angular.forEach(links, fn);
 								},
 								'$prepareURI': function(uri){
 									if(angular.isString(uri)){
@@ -153,8 +159,8 @@
 								'configLoaders': {},
 							};
 
-							var ldrvn = {
-								'ldrvn': function(links){
+							var $ldrvn = {
+								'create': function(links){
 									return new LinkDriven(links);
 								},
 								'loadConfig': function(url){
@@ -173,6 +179,9 @@
 									}
 
 									url = urlSolver(url);
+
+									if(angular.isDefined(local.configLoaders[url])) return local.configLoaders[url];
+
 									return local.configLoaders[url] = $http.get(url, {'cache': Config.cache}).then(function(response){
 										return new Config(response.data);
 									});
@@ -181,7 +190,7 @@
 									var service = Object.create(angular.extend(new Services(), description));
 
 									Object.defineProperty(service, 'promise', {
-										'value': ldrvn.loadConfig(config).then(function(configService){
+										'value': $ldrvn.loadConfig(config).then(function(configService){
 											Object.defineProperty(service, '$$configService', {
 												'value': configService,
 											});
@@ -194,19 +203,19 @@
 								},
 							};
 
-							Object.defineProperty(ldrvn, 'NONECONFIG', {
+							Object.defineProperty($ldrvn, 'NONECONFIG', {
 								'value': new Config({}),
 							});
 
 							angular.forEach(localProvider.engines, function(engine, name){
-								LinkDriven.prototype[name] = $injector.invoke(engine, ldrvn);
+								LinkDriven.prototype[name] = $injector.invoke(engine, $ldrvn);
 							});
 
 							angular.forEach(localProvider.services, function(service, name){
-								Services.prototype[name] = $injector.invoke(service, ldrvn);
+								Services.prototype[name] = $injector.invoke(service, $ldrvn);
 							});
 
-							return ldrvn;
+							return $ldrvn;
 						}
 					],
 				};

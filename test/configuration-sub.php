@@ -11,6 +11,16 @@
 			"method": "put",
 			"href": "<?= BASEPATH ?>data.php/{{ id }}",
 			"alias": "update"
+		},
+		{
+			"rel": "module",
+			"href": "<?= BASEPATH ?>configuration-sub01",
+			"alias": "sub01-config"
+		},
+		{
+			"rel": "module",
+			"href": "<?= BASEPATH ?>configuration-sub02",
+			"alias": "sub02-config"
 		}
 	]
 }
