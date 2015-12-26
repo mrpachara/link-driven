@@ -14,12 +14,12 @@
 		},
 		{
 			"rel": "module",
-			"href": "<?= BASEPATH ?>configuration-sub01",
+			"href": "<?= BASEPATH ?>configuration-sub01.php",
 			"alias": "sub01-config"
 		},
 		{
 			"rel": "module",
-			"href": "<?= BASEPATH ?>configuration-sub02",
+			"href": "<?= BASEPATH ?>configuration-sub02.php",
 			"alias": "sub02-config"
 		}
 	]

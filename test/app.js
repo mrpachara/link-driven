@@ -38,7 +38,7 @@ console.info('app config');
 
 				$ldrvn.loadConfig('./configuration').then(function(configService){
 					configService.module().dependencies().then(function(modules){
-						console.debug('dependencies:', modules);
+console.error('dependencies:', modules);
 					});
 				}, function(error){
 console.error(error);

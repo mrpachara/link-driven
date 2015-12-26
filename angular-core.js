@@ -78,6 +78,8 @@
 									return null;
 								},
 								'$links': function(rel){
+									if(arguments.length === 0) return this.$$links;
+
 									var links = [];
 									for(var i = 0; i < this.$$links.length; i++){
 										var link = this.$$links[i];

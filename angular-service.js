@@ -5,7 +5,6 @@
 		.config([
 			'$ldrvnProvider',
 			function($ldrvnProvider){
-				var debug_count = 0;
 				$ldrvnProvider.appendEngine({
 					'module': [
 						'$q',
@@ -29,52 +28,36 @@
 									;
 								},
 								'dependencies': function(){
-									if(debug_count > 100){
-console.warn('infinity');
-										return $q.reject([]);
-									}
-									console.debug('count', ++debug_count);
 									if(this.$$dependenciesHandler !== null) return this.$$dependenciesHandler;
-console.warn('unknow handler');
+
 									var inst = this;
 
-									var loaders = [];
 									var modules = [];
+									var exceptUrls = [];
 
-									inst.$$ldrvn.$forLinks(function(link){
-										loaders.push($ldrvn.loadConfig(inst.$$ldrvn.$url(link)));
-									});
+									function dependenciesFn(configService){
+										if(configService.$$config) modules.push(configService);
+										var loaders = [];
+										configService.module().$$ldrvn.$forLinks(function(link){
+											var url = configService.module().$$ldrvn.$url(link);
+											if(exceptUrls.indexOf(url) < 0){
+												exceptUrls.push(url);
+												loaders.push($ldrvn.loadConfig(url).then(dependenciesFn));
+											}
+										});
 
-									var handler = $q.all(loaders)
-										.then(function(configServices){
-											var subDependencies = [];
-											angular.forEach(configServices, function(configService){
-console.debug('adding:', configService);
-												modules.push(configService);
-												subDependencies.push(configService.module().dependencies()
-													.then(function(subModules){
-														angular.forEach(subModules, function(subModule){
-console.warn('checking:', subModule.$prop('uri'));
-angular.forEach(modules, function(module){
-	console.warn('\t', (subModule === module),module.$prop('uri'));
-});
-															if(modules.indexOf(subModule) < 0){
-																modules.push(subModule);
-															}
-														});
-													})
-												);
-											});
-
-											return $q.all(subDependencies);
-										})
-										.then(function(){
-console.wran('return module:', modules);
+										return $q.all(loaders).then(function(){
 											return modules;
+										});
+									}
+
+									if(inst.$$dependenciesHandler === null)
+										inst.$$dependenciesHandler = dependenciesFn({
+											'module': function(){
+												return inst;
+											},
 										})
 									;
-
-									if(inst.$$dependenciesHandler === null) inst.$$dependenciesHandler = handler;
 
 									return inst.$$dependenciesHandler;
 								},
@@ -112,12 +95,6 @@ console.wran('return module:', modules);
 						}
 					],
 				});
-			}
-		])
-
-		.run([
-			function(){
-
 			}
 		])
 

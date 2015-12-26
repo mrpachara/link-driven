@@ -8,7 +8,7 @@
 	"links": [
 		{
 			"rel": "module",
-			"href": "<?= BASEPATH ?>configuration-sub02",
+			"href": "<?= BASEPATH ?>configuration-sub02.php",
 			"alias": "sub02-config"
 		}
 	]
