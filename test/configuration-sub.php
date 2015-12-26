@@ -13,6 +13,11 @@
 			"alias": "update"
 		},
 		{
+			"rel": "module/javascript",
+			"href": "<?= BASEPATH ?>js01.js",
+			"alias": "js01"
+		},
+		{
 			"rel": "module",
 			"href": "<?= BASEPATH ?>configuration-sub01.php",
 			"alias": "sub01-config"

@@ -165,6 +165,19 @@
 								'create': function(links){
 									return new LinkDriven(links);
 								},
+								'extendLdrvn': function(fn){
+									if(!angular.isFunction(fn)){
+										$log.error('Giving parameter is not a function!!!');
+										return;
+									}
+
+									var tmpPrototype = fn.prototype;
+									fn.prototype = Object.create(LinkDriven.prototype);
+									fn.prototype.constructor = fn;
+									angular.extend(fn.prototype, tmpPrototype);
+
+									return fn;
+								},
 								'loadConfig': function(url){
 									if(angular.isObject(url)){
 										if(angular.isFunction(url.catch)){
@@ -207,6 +220,10 @@
 
 							Object.defineProperty($ldrvn, 'NONECONFIG', {
 								'value': new Config({}),
+							});
+
+							Object.defineProperty($ldrvn, 'CLASS', {
+								'value': LinkDriven,
 							});
 
 							angular.forEach(localProvider.engines, function(engine, name){

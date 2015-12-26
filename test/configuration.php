@@ -22,6 +22,11 @@
 			"alias": "main-layout"
 		},
 		{
+			"rel": "module/javascript",
+			"href": "<?= BASEPATH ?>js00.js",
+			"alias": "js00"
+		},
+		{
 			"rel": "module",
 			"href": "<?= BASEPATH ?>configuration-sub.php",
 			"alias": "sub-config"

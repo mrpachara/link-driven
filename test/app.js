@@ -3,8 +3,8 @@
 
 	angular.module('app', ['ldrvn.service', 'app.sub'])
 		.config([
-			'$ldrvnProvider', 'layoutServiceProvider',
-			function($ldrvnProvider, layoutServiceProvider){
+			'$ldrvnProvider', 'configServiceProvider', 'layoutServiceProvider',
+			function($ldrvnProvider, configServiceProvider, layoutServiceProvider){
 console.info('app config');
 				$ldrvnProvider.appendEngine({
 					'template': [
@@ -23,18 +23,14 @@ console.info('app config');
 					],
 				});
 
-				layoutServiceProvider.configURI('./configuration.php');
+				configServiceProvider.configURI('./configuration.php');
 			}
 		])
 
 		.run([
-			'$rootScope', '$ldrvn', 'layoutService',
-			function($rootScope, $ldrvn, layoutService){
+			'$rootScope', '$ldrvn', 'moduleService', 'layoutService',
+			function($rootScope, $ldrvn, moduleService, layoutService){
 				$rootScope.layoutService = layoutService;
-
-				layoutService.promise.then(function(service){
-					service.url('main-layout');
-				});
 
 				$ldrvn.loadConfig('./configuration').then(function(configService){
 					configService.module().dependencies().then(function(modules){
@@ -43,6 +39,17 @@ console.error('dependencies:', modules);
 				}, function(error){
 console.error(error);
 				});
+
+				moduleService.appendScripts().then(function(scripts){
+console.error(scripts);
+				}, function(error){
+console.error(error);
+				});
+
+				layoutService.promise.then(function(service){
+					service.url('main-layout');
+				});
+
 			}
 		])
 
