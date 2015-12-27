@@ -7,10 +7,8 @@
 			function($ldrvnProvider){
 				$ldrvnProvider.appendEngine({
 					'module': [
-						'$q',
-						function($q){
-							var $ldrvn = this;
-
+						'$q', '$ldrvn',
+						function($q, $ldrvn){
 							function ModuleEngine(){
 								$ldrvn.CLASS.apply(this, arguments);
 
@@ -19,11 +17,7 @@
 
 							angular.extend($ldrvn.extendLdrvn(ModuleEngine).prototype, {
 								'ref': function(uri){
-									var url = this.$url(uri);
-
-									return (url)?
-										$ldrvn.loadConfig(url) : $ldrv.loadConfig($ldrvn.NONECONFIG)
-									;
+									return $ldrvn.loadConfig(this.$url(uri));
 								},
 								'dependencies': function(){
 									if(this.$$dependenciesHandler !== null) return this.$$dependenciesHandler;
@@ -69,10 +63,8 @@
 						}
 					],
 					'moduleJavascript': [
-						'$document', '$q',
-						function($document, $q){
-							var $ldrvn = this;
-
+						'$document', '$q', '$ldrvn',
+						function($document, $q, $ldrvn){
 							function ModuleJavascriptEngine(){
 								$ldrvn.CLASS.apply(this, arguments);
 
@@ -85,21 +77,46 @@
 
 									var inst = this;
 									var loaders = [];
+									var moduleIds = [];
 									inst.$forLinks(function(link){
 										var url = inst.$url(link);
-										var scriptDefer = $q.defer();
-										loaders.push(scriptDefer.promise);
+										var elemHead = $document.find('head');
+										moduleIds.push(link['module-id']);
+										var scriptHandler;
 
-										var script = $document[0].createElement('script');
-										script.setAttribute('type', 'application/javascript');
-										$document.find('head').append(script);
-										script.addEventListener('load', function(ev){
-											scriptDefer.resolve(script);
-										}, false);
-										script.setAttribute('src', url);
+										var elemExistedScript = elemHead.find('script[type="application/javascript"][data-module-id="' + link['module-id'] + '"]');
+										if(elemExistedScript.length === 0){
+											var scriptDefer = $q.defer();
+											scriptHandler = scriptDefer.promise;
+											var script = $document[0].createElement('script');
+											script.setAttribute('type', 'application/javascript');
+											script.setAttribute('data-module-id', link['module-id']);
+											angular.element(script).data('loadHandler', scriptDefer.promise);
+											elemHead.append(script);
+											script.addEventListener('load', function(ev){
+												scriptDefer.resolve(script);
+											}, false);
+											script.addEventListener('error', function(ev){
+												scriptDefer.reject(ev);
+											}, false);
+											script.setAttribute('src', url);
+										} else{
+											var existedScriptHandler = elemExistedScript.data('loadHandler');
+											if(angular.isDefined(existedScriptHandler)){
+												scriptHandler = elemExistedScript.data('loadHandler');
+											} else{
+												var scriptDefer = $q.defer();
+												scriptHandler = scriptDefer.promise;
+												scriptDefer.resolve(elemExistedScript[0]);
+											}
+										}
+
+										loaders.push(scriptHandler);
 									});
 
-									return this.$$scriptsHandler = $q.all(loaders);
+									return this.$$scriptsHandler = $q.all(loaders).then(function(){
+										return moduleIds;
+									});
 								},
 							});
 
@@ -111,9 +128,8 @@
 						}
 					],
 					'layout': [
-						function(){
-							var $ldrvn = this;
-
+						'$ldrvn',
+						function($ldrvn){
 							function LayoutEngine(){
 								$ldrvn.CLASS.apply(this, arguments);
 							}
@@ -129,7 +145,6 @@
 
 								return this.$$layout = new LayoutEngine(this.$links('layout'));
 							};
-
 						}
 					],
 				});
@@ -167,21 +182,19 @@
 
 				var provider = {
 					'$get': [
-						'$q', '$ldrvn',
-						function($q, $ldrvn){
-							var initialed = true;
+						'$log', '$q', '$ldrvn',
+						function($log, $q, $ldrvn){
 							var configURI = configServiceProvider.configURI();
 
 							if(angular.isUndefined(configURI)){
 								$log.error('Configuration for module not found!!!');
-								initialed = false;
 							}
 
 							var local = {
 								'scriptsHandler': null,
 							};
 
-							return $ldrvn.createService($ldrvn.loadConfig((initialed)? configURI : $ldrvn.NONECONFIG), {
+							return $ldrvn.createService($ldrvn.loadConfig(configURI), {
 								'appendScripts': function(){
 									return this.promise.then(function(service){
 										return service.$$configService.module().dependencies().then(function(configServices){
@@ -222,19 +235,17 @@
 					'$get': [
 						'$log', '$ldrvn',
 						function($log, $ldrvn){
-							var initialed = true;
 							var configURI = configServiceProvider.configURI();
 
 							if(angular.isUndefined(configURI)){
 								$log.error('Configuration for layout not found!!!');
-								initialed = false;
 							}
 
 							var local = {
 								'url': undefined,
 							};
 
-							return $ldrvn.createService($ldrvn.loadConfig((initialed)? configURI : $ldrvn.NONECONFIG), {
+							return $ldrvn.createService($ldrvn.loadConfig(configURI), {
 								'url': function(uri){
 									if(arguments.length === 0) return local.url;
 									local.url = this.$$configService.layout().url(uri);

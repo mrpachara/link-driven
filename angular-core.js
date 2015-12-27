@@ -1,4 +1,4 @@
-(function(angular){
+(function(GLOBALOBJECT, angular){
 	'use strict';
 
 	var urlSolver = (function(){
@@ -197,9 +197,16 @@
 
 									if(angular.isDefined(local.configLoaders[url])) return local.configLoaders[url];
 
-									return local.configLoaders[url] = $http.get(url, {'cache': Config.cache}).then(function(response){
-										return new Config(response.data);
-									});
+									return local.configLoaders[url] = $http.get(url, {'cache': Config.cache})
+										.then(
+											function(response){
+												return new Config(response.data);
+											},
+											function(error){
+												$log.error(error);
+												return $ldrvn.NONECONFIG;
+											}
+									);
 								},
 								'createService': function(config, description){
 									var service = Object.create(angular.extend(new Services(), description));
@@ -227,11 +234,11 @@
 							});
 
 							angular.forEach(localProvider.engines, function(engine, name){
-								LinkDriven.prototype[name] = $injector.invoke(engine, $ldrvn);
+								LinkDriven.prototype[name] = $injector.invoke(engine, GLOBALOBJECT, {'$ldrvn': $ldrvn});
 							});
 
 							angular.forEach(localProvider.services, function(service, name){
-								Services.prototype[name] = $injector.invoke(service, $ldrvn);
+								Services.prototype[name] = $injector.invoke(service, GLOBALOBJECT, {'$ldrvn': $ldrvn});
 							});
 
 							return $ldrvn;
@@ -243,4 +250,4 @@
 			}
 		])
 	;
-})(this.angular);
+})(this, this.angular);

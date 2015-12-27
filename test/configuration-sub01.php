@@ -8,11 +8,13 @@
 	"links": [
 		{
 			"rel": "module/javascript",
+			"module-id": "app.js02",
 			"href": "<?= BASEPATH ?>js02.js",
 			"alias": "js03"
 		},
 		{
 			"rel": "module/javascript",
+			"module-id": "app.js03",
 			"href": "<?= BASEPATH ?>js03.js",
 			"alias": "js03"
 		},

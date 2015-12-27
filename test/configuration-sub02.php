@@ -8,6 +8,7 @@
 	"links": [
 		{
 			"rel": "module/javascript",
+			"module-id": "app.js04",
 			"href": "<?= BASEPATH ?>js04.js",
 			"alias": "js04"
 		},

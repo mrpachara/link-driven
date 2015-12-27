@@ -40,12 +40,6 @@ console.error('dependencies:', modules);
 console.error(error);
 				});
 
-				moduleService.appendScripts().then(function(scripts){
-console.error(scripts);
-				}, function(error){
-console.error(error);
-				});
-
 				layoutService.promise.then(function(service){
 					service.url('main-layout');
 				});
@@ -81,7 +75,7 @@ console.debug('test01', service, service.$$configService);
 					'send': function(item){
 						var service = this;
 						if(angular.isUndefined(service.$$configService)) return $q.reject(new Error('Service not ready'));
-
+console.debug('send called');
 						return service.$$configService.module().ref('sub-config').then(function(configService){
 							return configService.$http(['update', item], {'data': item});
 						});

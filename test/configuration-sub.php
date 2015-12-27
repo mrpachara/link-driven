@@ -14,6 +14,7 @@
 		},
 		{
 			"rel": "module/javascript",
+			"module-id": "app.js01",
 			"href": "<?= BASEPATH ?>js01.js",
 			"alias": "js01"
 		},

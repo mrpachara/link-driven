@@ -23,6 +23,19 @@
 		},
 		{
 			"rel": "module/javascript",
+			"module-id": "app",
+			"href": "<?= BASEPATH ?>app.js",
+			"alias": "app"
+		},
+		{
+			"rel": "module/javascript",
+			"module-id": "app.sub",
+			"href": "<?= BASEPATH ?>app-sub.js",
+			"alias": "app.sub"
+		},
+		{
+			"rel": "module/javascript",
+			"module-id": "app.js00",
 			"href": "<?= BASEPATH ?>js00.js",
 			"alias": "js00"
 		},
