@@ -1,0 +1,24 @@
+{
+  "name": "link-driven",
+  "homepage": "https://github.com/pachara-camt/link-driven",
+  "authors": [
+    "Pachara Tinamas <mrpachara@gmail.com>"
+  ],
+  "description": "Link Driven for Web Application",
+  "main": "./angular-cor.js ./angular-service.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "link-driven"
+  ],
+  "license": "N",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
