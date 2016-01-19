@@ -20,12 +20,12 @@
 	}
 	function LinkDriven(){
 		LinkDrivenPrototype.apply(this, arguments);
-	};
+	}
 
-	function ServicesPrototype(){};
+	function ServicesPrototype(){}
 	function Services(){
 		ServicesPrototype.apply(this, arguments);
-	};
+	}
 
 	LinkDriven.prototype = Object.create(LinkDrivenPrototype.prototype);
 	LinkDriven.prototype.constructor = LinkDriven;
@@ -115,10 +115,10 @@
 									return (uri[0] === null)? null : uri[0].$$interpolate(uri[1]);
 								},
 								'$http': function(uri, config){
-									var uri = this.$prepareURI(uri);
+									uri = this.$prepareURI(uri);
 
 									var extend = {'url': this.$url(uri)};
-									if(angular.isDefined(uri[0].method)) extend['method'] = uri[0].method;
+									if(angular.isDefined(uri[0].method)) extend.method = uri[0].method;
 
 									return $http(angular.extend({}, config, extend)).then(function(response){
 										return response.data;
@@ -197,7 +197,7 @@
 
 									if(angular.isDefined(local.configLoaders[url])) return local.configLoaders[url];
 
-									return local.configLoaders[url] = $http.get(url, {'cache': Config.cache})
+									return (local.configLoaders[url] = $http.get(url, {'cache': Config.cache})
 										.then(
 											function(response){
 												return new Config(response.data);
@@ -206,7 +206,7 @@
 												$log.error(error);
 												return $ldrvn.NONECONFIG;
 											}
-									);
+									));
 								},
 								'createService': function(config, description){
 									var service = Object.create(angular.extend(new Services(), description));

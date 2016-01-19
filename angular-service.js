@@ -1,4 +1,4 @@
-(function(angular){
+(function(GLOBALOBJECT, angular){
 	'use strict';
 
 	angular.module('ldrvn.service', ['ldrvn'])
@@ -58,7 +58,7 @@
 							return function(){
 								if(angular.isDefined(this.$$module)) return this.$$module;
 
-								return this.$$module = new ModuleEngine(this.$links('module'));
+								return (this.$$module = new ModuleEngine(this.$links('module')));
 							};
 						}
 					],
@@ -83,10 +83,11 @@
 										var elemHead = $document.find('head');
 										moduleIds.push(link['module-id']);
 										var scriptHandler;
+										var scriptDefer;
 
 										var elemExistedScript = elemHead.find('script[type="application/javascript"][data-module-id="' + link['module-id'] + '"]');
 										if(elemExistedScript.length === 0){
-											var scriptDefer = $q.defer();
+											scriptDefer = $q.defer();
 											scriptHandler = scriptDefer.promise;
 											var script = $document[0].createElement('script');
 											script.setAttribute('type', 'application/javascript');
@@ -105,7 +106,7 @@
 											if(angular.isDefined(existedScriptHandler)){
 												scriptHandler = elemExistedScript.data('loadHandler');
 											} else{
-												var scriptDefer = $q.defer();
+												scriptDefer = $q.defer();
 												scriptHandler = scriptDefer.promise;
 												scriptDefer.resolve(elemExistedScript[0]);
 											}
@@ -114,16 +115,16 @@
 										loaders.push(scriptHandler);
 									});
 
-									return this.$$scriptsHandler = $q.all(loaders).then(function(){
+									return (this.$$scriptsHandler = $q.all(loaders).then(function(){
 										return moduleIds;
-									});
+									}));
 								},
 							});
 
 							return function(){
 								if(angular.isDefined(this.$$moduleJavascript)) return this.$$moduleJavascript;
 
-								return this.$$moduleJavascript = new ModuleJavascriptEngine(this.$links('module/javascript'));
+								return (this.$$moduleJavascript = new ModuleJavascriptEngine(this.$links('module/javascript')));
 							};
 						}
 					],
@@ -143,10 +144,30 @@
 							return function(){
 								if(angular.isDefined(this.$$layout)) return this.$$layout;
 
-								return this.$$layout = new LayoutEngine(this.$links('layout'));
+								return (this.$$layout = new LayoutEngine(this.$links('layout')));
 							};
 						}
 					],
+					'template': [
+						'$ldrvn',
+						function($ldrvn){
+							function TemplateEngine(){
+								$ldrvn.CLASS.apply(this, arguments);
+							}
+
+							angular.extend($ldrvn.extendLdrvn(TemplateEngine).prototype, {
+								'url': function(uri){
+									return this.$url(uri);
+								},
+							});
+
+							return function(){
+								if(angular.isDefined(this.$$template)) return this.$$template;
+
+								return (this.$$template = new TemplateEngine(this.$links('template')));
+							};
+						}
+					]
 				});
 			}
 		])
@@ -165,7 +186,11 @@
 						return provider;
 					},
 					'$get': function(){
-						return {};
+						return {
+							'configURI': function(){
+								return provider.configURI();
+							},
+						};
 					},
 				};
 
@@ -176,10 +201,6 @@
 		.provider('moduleService', [
 			'configServiceProvider',
 			function(configServiceProvider){
-				var localProvider = {
-					'uri': undefined,
-				};
-
 				var provider = {
 					'$get': [
 						'$log', '$q', '$ldrvn',
@@ -189,10 +210,6 @@
 							if(angular.isUndefined(configURI)){
 								$log.error('Configuration for module not found!!!');
 							}
-
-							var local = {
-								'scriptsHandler': null,
-							};
 
 							return $ldrvn.createService($ldrvn.loadConfig(configURI), {
 								'appendScripts': function(){
@@ -227,10 +244,6 @@
 		.provider('layoutService', [
 			'configServiceProvider',
 			function(configServiceProvider){
-				var localProvider = {
-					'uri': undefined,
-				};
-
 				var provider = {
 					'$get': [
 						'$log', '$ldrvn',
@@ -261,4 +274,4 @@
 			}
 		])
 	;
-})(this.angular);
+})(this, this.angular);
