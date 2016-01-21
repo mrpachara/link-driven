@@ -6,22 +6,6 @@
 			'$ldrvnProvider', 'configServiceProvider', 'layoutServiceProvider',
 			function($ldrvnProvider, configServiceProvider, layoutServiceProvider){
 console.info('app config');
-				$ldrvnProvider.appendEngine({
-					'template': [
-						function(){
-							return function(uri, data){
-								var result = null;
-
-								uri = this.$prepareURI(uri);
-								if((uri[0] !== null) && (uri[0].rel === 'template')){
-									result = this.$url(uri);
-								}
-
-								return result;
-							};
-						}
-					],
-				});
 
 				configServiceProvider.configURI('./configuration.php');
 			}
@@ -103,7 +87,7 @@ console.info('app run');
 console.debug('test02', service, service.$$configService);
 						if(angular.isUndefined(service.$$configService)) return null;
 
-						return service.$$configService.template(href);
+						return service.$$configService.template().url(href);
 					},
 				});
 			}

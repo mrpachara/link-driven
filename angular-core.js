@@ -11,9 +11,15 @@
 	})();
 
 	function LinkDrivenPrototype(links){
-		Object.defineProperty(this, '$$links', {
-			'value': links,
-		});
+		if(angular.isFunction(links)){
+			Object.defineProperty(this, '$$links', {
+				'get': links,
+			});
+		} else{
+			Object.defineProperty(this, '$$links', {
+				'value': links,
+			});
+		}
 		angular.forEach(links, function(link){
 			LinkDrivenPrototype.init(link);
 		});

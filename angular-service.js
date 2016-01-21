@@ -58,7 +58,10 @@
 							return function(){
 								if(angular.isDefined(this.$$module)) return this.$$module;
 
-								return (this.$$module = new ModuleEngine(this.$links('module')));
+								var self = this;
+								return (this.$$module = new ModuleEngine(function(){
+									return self.$links('module');
+								}));
 							};
 						}
 					],
@@ -124,7 +127,10 @@
 							return function(){
 								if(angular.isDefined(this.$$moduleJavascript)) return this.$$moduleJavascript;
 
-								return (this.$$moduleJavascript = new ModuleJavascriptEngine(this.$links('module/javascript')));
+								var self = this;
+								return (this.$$moduleJavascript = new ModuleJavascriptEngine(function(){
+									return self.$links('module/javascript');
+								}));
 							};
 						}
 					],
@@ -144,7 +150,10 @@
 							return function(){
 								if(angular.isDefined(this.$$layout)) return this.$$layout;
 
-								return (this.$$layout = new LayoutEngine(this.$links('layout')));
+								var self = this;
+								return (this.$$layout = new LayoutEngine(function(){
+									return self.$links('layout');
+								}));
 							};
 						}
 					],
@@ -164,10 +173,27 @@
 							return function(){
 								if(angular.isDefined(this.$$template)) return this.$$template;
 
-								return (this.$$template = new TemplateEngine(this.$links('template')));
+								var self = this;
+								return (this.$$template = new TemplateEngine(function(){
+									return self.$links('template');
+								}));
 							};
 						}
 					]
+				});
+
+				$ldrvnProvider.appendService({
+					'template': [
+						'$ldrvn',
+						function($ldrvn){
+							return function(uri){
+								var service = this;
+								if(angular.isUndefined(service.$$configService)) return null;
+
+								return service.$$configService.template().url(uri);
+							};
+						}
+					],
 				});
 			}
 		])

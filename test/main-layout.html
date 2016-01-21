@@ -1,5 +1,5 @@
 <div ng-controller="TestCase01 as testCase01">
 	<button type="button" ng-click="testCase01.send()">Send</button>
 	<pre>{{ testCase01|json:true }}</pre>
-	<div ng-include="testCase01.service02.templatex('resultTemplate')"></div>
+	<div ng-include="testCase01.service02.template('resultTemplate')"></div>
 </div>
