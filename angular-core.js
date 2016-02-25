@@ -65,9 +65,10 @@
 									if(angular.isDefined(link.$$interpolate)) return link;
 
 									if(angular.isDefined(link.href)) link.href = urlSolver(link.href);
-									if(angular.isDefined(link.pattern)) link.pattern = urlSolver(link.pattern);
+									//if(angular.isDefined(link.pattern)) link.pattern = urlSolver(link.pattern);
 									Object.defineProperty(link, '$$interpolate', {
-										'value': $interpolate((angular.isDefined(link.pattern))? link.pattern : link.href),
+										//'value': $interpolate((angular.isDefined(link.pattern))? link.pattern : link.href),
+										'value': $interpolate((angular.isDefined(link.href))? link.href : ''),
 									});
 
 									return link;
