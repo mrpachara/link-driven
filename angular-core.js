@@ -79,7 +79,7 @@
 								'$link': function(href){
 									for(var i = 0; i < this.$$links.length; i++){
 										var link = this.$$links[i];
-										if((link.href === href) || (link.alias === href)) return LinkDrivenPrototype.init(link);
+										if((link.alias === href) || (link.href === href)) return LinkDrivenPrototype.init(link);
 									}
 
 									return null;
