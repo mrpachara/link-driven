@@ -127,9 +127,14 @@
 									var extend = {'url': this.$url(uri)};
 									if(angular.isDefined(uri[0].method)) extend.method = uri[0].method;
 
-									return $http(angular.extend({}, config, extend)).then(function(response){
-										return response.data;
-									});
+									return $http(angular.extend({}, config, extend)).then(
+										function(response){
+											return response.data;
+										},
+										function(response){
+											return $q.reject(response.data);
+										}
+									);
 								},
 								'$load': function(uri, config){
 									if(arguments.length < 2) config = {};
