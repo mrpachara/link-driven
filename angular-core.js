@@ -122,6 +122,7 @@
 									return (uri[0] === null)? null : uri[0].$$interpolate(uri[1]);
 								},
 								'$http': function(uri, config){
+									config = config || {};
 									uri = this.$prepareURI(uri);
 
 									var extend = {'url': this.$url(uri)};
@@ -137,14 +138,14 @@
 									);
 								},
 								'$load': function(uri, config){
-									if(arguments.length < 2) config = {};
+									config = config || {};
 
 									return this.$http(uri, config);
 								},
 								'$send': function(uri, data, config){
-									if(arguments.length < 3) config = {};
+									config = config || {};
 
-									config = angular.extend({}, {'data': data, 'method': 'post'});
+									angular.extend(config, {'data': data, 'method': 'post'});
 									return this.$http(uri, config);
 								},
 							});
