@@ -65,6 +65,75 @@
 							};
 						}
 					],
+					'selfJavascript': [
+						'$document', '$q', '$ldrvn',
+						function($document, $q, $ldrvn){
+							function SelfJavascriptEngine(){
+								$ldrvn.CLASS.apply(this, arguments);
+
+								this.$$scriptsHandler = null;
+							}
+
+							angular.extend($ldrvn.extendLdrvn(SelfJavascriptEngine).prototype, {
+								'appendScripts': function(){
+									if(this.$$scriptsHandler !== null) return this.$$scriptsHandler;
+
+									var inst = this;
+									var loaders = [];
+									var moduleIds = [];
+									inst.$forLinks(function(link){
+										var url = inst.$url(link);
+										var elemHead = $document.find('head');
+										moduleIds.push(link['module-id']);
+										var scriptHandler;
+										var scriptDefer;
+
+										var elemExistedScript = elemHead.find('script[type="application/javascript"][data-module-id="' + link['module-id'] + '"]');
+										if(elemExistedScript.length === 0){
+											scriptDefer = $q.defer();
+											scriptHandler = scriptDefer.promise;
+											var script = $document[0].createElement('script');
+											script.setAttribute('type', 'application/javascript');
+											script.setAttribute('data-module-id', link['module-id']);
+											angular.element(script).data('loadHandler', scriptDefer.promise);
+											elemHead.append(script);
+											script.addEventListener('load', function(ev){
+												scriptDefer.resolve(script);
+											}, false);
+											script.addEventListener('error', function(ev){
+												scriptDefer.reject(ev);
+											}, false);
+											script.setAttribute('src', url);
+										} else{
+											var existedScriptHandler = elemExistedScript.data('loadHandler');
+											if(angular.isDefined(existedScriptHandler)){
+												scriptHandler = elemExistedScript.data('loadHandler');
+											} else{
+												scriptDefer = $q.defer();
+												scriptHandler = scriptDefer.promise;
+												scriptDefer.resolve(elemExistedScript[0]);
+											}
+										}
+
+										loaders.push(scriptHandler);
+									});
+
+									return (this.$$scriptsHandler = $q.all(loaders).then(function(){
+										return moduleIds;
+									}));
+								},
+							});
+
+							return function(){
+								if(angular.isDefined(this.$$selfJavascript)) return this.$$selfJavascript;
+
+								var self = this;
+								return (this.$$selfJavascript = new SelfJavascriptEngine(function(){
+									return self.$links('self/javascript');
+								}));
+							};
+						}
+					],
 					'moduleJavascript': [
 						'$document', '$q', '$ldrvn',
 						function($document, $q, $ldrvn){
