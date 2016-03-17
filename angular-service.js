@@ -315,6 +315,7 @@
 											angular.forEach(configServices.reverse(), function(configService){
 												handlers.push(configService.moduleJavascript().appendScripts());
 											});
+											handlers.push(service.$$configService.selfJavascript().appendScripts());
 
 											return $q.all(handlers).then(function(moduleScripts){
 												var allScripts = [];
