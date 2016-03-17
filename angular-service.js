@@ -252,6 +252,17 @@
 				});
 
 				$ldrvnProvider.appendService({
+					'layout': [
+						'$ldrvn',
+						function($ldrvn){
+							return function(uri){
+								var service = this;
+								if(angular.isUndefined(service.$$configService)) return null;
+
+								return service.$$configService.layout().url(uri);
+							};
+						}
+					],
 					'template': [
 						'$ldrvn',
 						function($ldrvn){
