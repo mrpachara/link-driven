@@ -128,7 +128,7 @@
 									var extend = {'url': this.$url(uri)};
 									if(angular.isDefined(uri[0].method)) extend.method = uri[0].method;
 
-									return $http(angular.extend({}, config, extend)).then(
+									return $http(angular.extend(config, extend)).then(
 										function(response){
 											return response.data;
 										},
