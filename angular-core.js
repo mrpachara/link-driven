@@ -210,7 +210,7 @@
 
 									if(angular.isDefined(local.configLoaders[url])) return local.configLoaders[url];
 
-									return (local.configLoaders[url] = $http.get(url, {'cache': Config.cache})
+									return (local.configLoaders[url] = $http.get(url, {'cache': Config.cache, '_public': true})
 										.then(
 											function(response){
 												return new Config(response.data);
