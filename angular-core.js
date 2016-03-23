@@ -159,7 +159,13 @@
 							}
 
 							angular.extend(Config, {
-								'cache': $cacheFactory('config-cache'),
+								'cache': (function(){
+									try{
+										return $injector.get('configCache');
+									} catch(excp){
+										return $cacheFactory('config-cache');
+									}
+								})(),
 							});
 
 							Config.prototype = Object.create(LinkDriven.prototype);
