@@ -211,7 +211,7 @@
 											});
 										}
 									}
-console.debug(local.cache.info());
+
 									url = urlSolver(url);
 
 									var cached = local.cache.get(url);
