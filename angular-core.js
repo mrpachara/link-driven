@@ -271,4 +271,4 @@
 			}
 		])
 	;
-})(this, this.angular);
+})(this, angular);
