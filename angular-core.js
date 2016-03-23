@@ -177,7 +177,7 @@
 							});
 
 							var local = {
-								'configLoaders': {},
+								'cache': $cacheFactory('config-loader-cache'),
 							};
 
 							var $ldrvn = {
@@ -211,12 +211,13 @@
 											});
 										}
 									}
-
+console.debug(local.cache.info());
 									url = urlSolver(url);
 
-									if(angular.isDefined(local.configLoaders[url])) return local.configLoaders[url];
+									var cached = local.cache.get(url);
+									if(cached) return cached;
 
-									return (local.configLoaders[url] = $http.get(url, {'cache': Config.cache, '_public': true})
+									return local.cache.put(url, $http.get(url, {'cache': Config.cache, '_public': true})
 										.then(
 											function(response){
 												return new Config(response.data);
@@ -225,7 +226,8 @@
 												$log.error(error);
 												return $ldrvn.NONECONFIG;
 											}
-									));
+										)
+									);
 								},
 								'createService': function(config, description){
 									var service = Object.create(angular.extend(new Services(), description));
