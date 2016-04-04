@@ -203,29 +203,6 @@
 							};
 						}
 					],
-					'layout': [
-						'$ldrvn',
-						function($ldrvn){
-							function LayoutEngine(){
-								$ldrvn.CLASS.apply(this, arguments);
-							}
-
-							angular.extend($ldrvn.extendLdrvn(LayoutEngine).prototype, {
-								'url': function(uri){
-									return this.$url(uri);
-								},
-							});
-
-							return function(){
-								if(angular.isDefined(this.$$layout)) return this.$$layout;
-
-								var self = this;
-								return (this.$$layout = new LayoutEngine(function(){
-									return self.$links('layout');
-								}));
-							};
-						}
-					],
 					'template': [
 						'$ldrvn',
 						function($ldrvn){
@@ -252,17 +229,6 @@
 				});
 
 				$ldrvnProvider.appendService({
-					'layout': [
-						'$ldrvn',
-						function($ldrvn){
-							return function(uri){
-								var service = this;
-								if(angular.isUndefined(service.$$configService)) return null;
-
-								return service.$$configService.layout().url(uri);
-							};
-						}
-					],
 					'template': [
 						'$ldrvn',
 						function($ldrvn){
@@ -347,7 +313,7 @@
 				return provider;
 			}
 		])
-
+/*
 		.provider('layoutService', [
 			'configServiceProvider',
 			function(configServiceProvider){
@@ -380,5 +346,6 @@
 				return provider;
 			}
 		])
+*/
 	;
 })(this, angular);
